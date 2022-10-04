@@ -86,7 +86,7 @@ const incentiveTypes = [
 
 export default function RunsManager() {
 	const { palette, spacing } = useTheme();
-	const [selectedEvent, setSelectedEvent] = React.useState({ label: '', value: 'ASM2022' });
+	const [selectedEvent, setSelectedEvent] = React.useState({ label: '', value: 'ASAP2022' });
 	const [selectedIncentiveIndex, setSelectedIncentiveIndex] = React.useState(0);
 
 	const [incentiveActive, setIncentiveActive] = React.useState(false);
