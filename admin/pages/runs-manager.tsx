@@ -164,7 +164,7 @@ export default function RunsManager() {
 		try {
 			parsedTime = parse(format(parseISO(runDate), 'yyyy-MM-dd') + ' ' + runTime, 'yyyy-MM-dd HH:mm', new Date());
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
 
 		updateRunMutation({

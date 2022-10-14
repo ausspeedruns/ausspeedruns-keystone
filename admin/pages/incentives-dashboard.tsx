@@ -232,7 +232,7 @@ export default function RunsManager() {
 	}
 
 	// console.log();
-	console.log(sortedIncentives, eventData.data?.event.donationIncentives);
+	// console.log(sortedIncentives, eventData.data?.event.donationIncentives);
 
 	return (
 		<div css={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
