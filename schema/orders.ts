@@ -1,4 +1,4 @@
-import { graphql, graphQLSchemaExtension, list } from '@keystone-6/core';
+import { list } from '@keystone-6/core';
 import { checkbox, integer, relationship, select, text, timestamp, virtual } from '@keystone-6/core/fields';
 import { operations, permissions, SessionContext } from './access';
 import { Lists } from '.keystone/types';
@@ -31,8 +31,10 @@ const filterShirts = {
 export const ShirtOrder: Lists.ShirtOrder = list({
 	access: {
 		operation: {
+			query: () => true,
 			create: operations.canManageContent,
 			update: operations.canManageContent,
+			delete: () => true,
 		},
 		filter: filterShirts,
 	},

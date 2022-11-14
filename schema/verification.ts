@@ -15,23 +15,24 @@ import { SessionContext } from './access';
 export const Verification: Lists.Verification = list({
 	access: {
 		operation: {
-			create: ({session}) => {return session.data.roles?.some(role => role.admin)},
-			update: ({session}) => {return session.data.roles?.some(role => role.admin)},
-			// delete: () => {return false},
+			query: () => true,
+			create: ({ session }) => { return session.data.roles?.some(role => role.admin) },
+			update: ({ session }) => { return session.data.roles?.some(role => role.admin) },
+			delete: () => true,
 		},
 		// filter: {
 		// 	query: filterVerification
 		// }
 	},
 	fields: {
-		code: text({isIndexed: 'unique'}),
+		code: text({ isIndexed: 'unique' }),
 		account: text(),
 	},
 	hooks: {
 		afterOperation: ({ context, operation, originalItem }) => {
 			if (operation === 'delete') {
 				const sudoContext = context.sudo();
-				sudoContext.db.User.updateOne({ where: { id: originalItem.account }, data: { verified: true } });
+				sudoContext.db.User.updateOne({ where: { id: (originalItem.account as string) }, data: { verified: true } });
 				sudoContext.exitSudo();
 			}
 		}

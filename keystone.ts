@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { config, graphQLSchemaExtension, gql } from '@keystone-6/core';
+import { config, graphql } from '@keystone-6/core';
 import { statelessSessions } from '@keystone-6/core/session';
 import { createAuth } from '@keystone-6/auth';
 import { v4 as uuid } from 'uuid';
@@ -18,7 +18,7 @@ import { Context } from '.keystone/types';
 import { Volunteer } from './schema/volunteers';
 import { ShirtOrder } from './schema/orders';
 import { Incentive } from './schema/incentives';
-
+import { gql } from '@keystone-6/core/admin-ui/apollo';
 
 const session = statelessSessions({
   secret: process.env.SESSION_SECRET,
@@ -32,10 +32,6 @@ const { withAuth } = createAuth({
   sessionData: 'username id roles { admin canManageUsers canManageContent runner volunteer event { shortname } }',
   passwordResetLink: {
     sendToken: async ({ itemId, identity, token, context }) => {
-      // console.log('--------------- PASSWORD RESET ---------------');
-      // console.log(identity);
-      // console.log(token);
-      // console.log('----------------------------------------------');
       sendResetPassword(identity, token);
     }
   },
@@ -58,145 +54,148 @@ const { withAuth } = createAuth({
   },
 });
 
-// const database: DatabaseConfig<BaseKeystoneTypeInfo> = process.env.NODE_ENV === "production" ? { provider: 'postgresql', url: process.env.DATABASE_URL, useMigrations: true } : { provider: 'sqlite', url: 'file:./app.db', useMigrations: true };
-
 export default withAuth(
   config({
     db: { provider: 'postgresql', url: process.env.DATABASE_URL, useMigrations: true },
     experimental: {
       generateNextGraphqlAPI: true,
-      generateNodeAPI: true,
     },
     lists: { Post, User, Submission, Event, Role, Run, Verification, Ticket, Volunteer, ShirtOrder, Incentive },
-    extendGraphqlSchema: graphQLSchemaExtension<Context>({
-      typeDefs: gql`
-        type Query {
-          verification(where: VerificationWhereUniqueInput!): Verification
-        }
+    extendGraphqlSchema: graphql.extend(base => {
+      return {
+        query: {
+          accountVerification: graphql.field({
+            type: base.object('Verification'),
+            args: {
+              where: graphql.arg({ type: graphql.nonNull(base.inputObject('VerificationWhereUniqueInput')) }),
+            },
+            async resolve(source, args, context: Context) {
+              // Super duper hacky way but oh well
+              try {
+                if (!args?.where?.code) {
+                  throw new Error("Missing code query");
+                }
 
-        type Mutation {
-          """ Update stripe ticket """
-          confirmStripe(stripeID: String!, numberOfTickets: Int!, apiKey: String!): Ticket
+                const itemArr = await context.sudo().db.Verification.findMany({ where: { code: { equals: args.where.code } } });
 
-          """ Generate a ticket """
-          generateTicket(userID: ID!, numberOfTickets: Int!, method: TicketMethodType!, event: String!, stripeID: String, apiKey: String!): Ticket
+                if (itemArr.length === 1) {
+                  return itemArr[0];
+                }
 
-          """ Update stripe shirt """
-          confirmShirtStripe(stripeID: String!, apiKey: String!): ShirtOrder
-
-          """ Generate a shirt """
-          generateShirt(userID: ID!, size: ShirtOrderSizeType!, method: TicketMethodType!, colour: ShirtOrderColourType!, stripeID: String, apiKey: String!): ShirtOrder
-        }
-      `,
-      resolvers: {
-        Query: {
-          verification: async (source, args, context) => {
-            // Super duper hacky way but oh well
-            try {
-              if (!args?.where?.code) {
-                throw new Error("Missing code query");
+                throw new Error("Couldn't find code or found too many.");
+              } catch (error) {
+                throw new Error(error);
               }
-
-              const itemArr = await context.sudo().db.Verification.findMany({ where: { code: { equals: args.where.code } } });
-
-              if (itemArr.length === 1) {
-                return itemArr[0];
-              }
-
-              throw new Error("Couldn't find code or found too many.");
-            } catch (error) {
-              throw new Error(error);
             }
-          },
+          })
         },
-        Mutation: {
-          confirmStripe: (root, { stripeID, numberOfTickets, apiKey }, context) => {
-            if (apiKey !== process.env.API_KEY) throw new Error("Incorrect API Key");
-            // if (apiKey !== process.env.API_KEY) {
-            //   // Debug only
-            //   console.log(`Tried to confirm stripe but had an API key error. Got ${apiKey}, expected ${process.env.API_KEY}`);
-            //   return;
-            // }
+        mutation: {
+          confirmStripe: graphql.field({
+            type: base.object('Ticket'),
+            args: {
+              stripeID: graphql.arg({ type: graphql.nonNull(graphql.String) }),
+              numberOfTickets: graphql.arg({ type: graphql.nonNull(graphql.Int) }),
+              apiKey: graphql.arg({ type: graphql.nonNull(graphql.String) }),
+            },
+            resolve(source, { apiKey, numberOfTickets, stripeID }, context: Context) {
+              if (apiKey !== process.env.API_KEY) throw new Error("Incorrect API Key");
+              // if (apiKey !== process.env.API_KEY) {
+              //   // Debug only
+              //   console.log(`Tried to confirm stripe but had an API key error. Got ${apiKey}, expected ${process.env.API_KEY}`);
+              //   return;
+              // }
 
-            return context.sudo().db.Ticket.updateOne({
-              where: { stripeID },
-              data: { paid: true, numberOfTickets }
-            });
-          },
-          generateTicket: async (root, { userID, numberOfTickets, method, event, stripeID, apiKey }, context) => {
-            if (apiKey !== process.env.API_KEY) throw new Error("Incorrect API Key");
-
-            // Check user is verified
-            const userVerified = await context.sudo().query.User.findOne({where: {id: userID}, query: 'verified'});
-
-            if (!userVerified.verified) {
-              // console.log(`Unverified user ${userID} tried to generate ticket.`)
-              throw new Error('Unverified user.');
+              return context.sudo().db.Ticket.updateOne({
+                where: { stripeID },
+                data: { paid: true, numberOfTickets }
+              });
             }
+          }),
+          generateTicket: graphql.field({
+            type: base.object('Ticket'),
+            args: {
+              userID: graphql.arg({ type: graphql.nonNull(graphql.ID) }),
+              numberOfTickets: graphql.arg({ type: graphql.nonNull(graphql.Int) }),
+              method: graphql.arg({ type: graphql.nonNull(base.enum('TicketMethodType')) }),
+              event: graphql.arg({ type: graphql.nonNull(graphql.String) }),
+              stripeID: graphql.arg({ type: graphql.String }),
+              apiKey: graphql.arg({ type: graphql.nonNull(graphql.String) }),
+            },
+            async resolve(source, { apiKey, event, method, numberOfTickets, stripeID, userID }, context: Context) {
+              if (apiKey !== process.env.API_KEY) throw new Error("Incorrect API Key");
 
-            return context.sudo().db.Ticket.createOne({
-              data: {
-                user: { connect: { id: userID } },
-                numberOfTickets,
-                method,
-                event: { connect: { shortname: event } },
-                stripeID: stripeID ?? uuid(),
+              // Check user is verified
+              const userVerified = await context.sudo().query.User.findOne({ where: { id: userID }, query: 'verified' });
+
+              if (!userVerified.verified) {
+                // console.log(`Unverified user ${userID} tried to generate ticket.`)
+                throw new Error('Unverified user.');
               }
-            });
-          },
-          confirmShirtStripe: (root, { stripeID, apiKey }, context) => {
-            if (apiKey !== process.env.API_KEY) throw new Error("Incorrect API Key");
 
-            return context.sudo().db.ShirtOrder.updateOne({
-              where: { stripeID },
-              data: { paid: true }
-            });
-          },
-          generateShirt: async (root, { userID, size, colour, method, stripeID, apiKey }, context) => {
-            if (apiKey !== process.env.API_KEY) throw new Error("Incorrect API Key");
-
-            // Check user is verified
-            const userVerified = await context.sudo().query.User.findOne({where: {id: userID}, query: 'verified'});
-
-            if (!userVerified.verified) {
-              // console.log(`Unverified user ${userID} tried to generate ticket.`)
-              throw new Error('Unverified user.');
+              return context.sudo().db.Ticket.createOne({
+                data: {
+                  user: { connect: { id: userID } },
+                  numberOfTickets,
+                  method,
+                  event: { connect: { shortname: event } },
+                  stripeID: stripeID ?? uuid(),
+                }
+              });
             }
+          }),
+          confirmShirtStripe: graphql.field({
+            type: base.object('ShirtOrder'),
+            args: {
+              stripeID: graphql.arg({ type: graphql.nonNull(graphql.String) }),
+              apiKey: graphql.arg({ type: graphql.nonNull(graphql.String) }),
+            },
+            resolve(source, { apiKey, stripeID }, context: Context) {
+              if (apiKey !== process.env.API_KEY) throw new Error("Incorrect API Key");
 
-            return context.sudo().db.ShirtOrder.createOne({
-              data: {
-                user: { connect: { id: userID } },
-                size,
-                colour,
-                method,
-                stripeID: stripeID ?? uuid(),
+              return context.sudo().db.ShirtOrder.updateOne({
+                where: { stripeID },
+                data: { paid: true }
+              });
+            }
+          }),
+          generateShirt: graphql.field({
+            type: base.object('ShirtOrder'),
+            args: {
+              userID: graphql.arg({ type: graphql.nonNull(graphql.ID) }),
+              size: graphql.arg({ type: graphql.nonNull(base.enum('ShirtOrderSizeType')) }),
+              method: graphql.arg({ type: graphql.nonNull(base.enum('TicketMethodType')) }),
+              colour: graphql.arg({ type: graphql.nonNull(base.enum('ShirtOrderColourType')) }),
+              stripeID: graphql.arg({ type: graphql.String }),
+              apiKey: graphql.arg({ type: graphql.nonNull(graphql.String) }),
+            },
+            async resolve(source, { apiKey, colour, method, size, stripeID, userID }, context: Context) {
+              if (apiKey !== process.env.API_KEY) throw new Error("Incorrect API Key");
+
+              // Check user is verified
+              const userVerified = await context.sudo().query.User.findOne({ where: { id: userID }, query: 'verified' });
+
+              if (!userVerified.verified) {
+                // console.log(`Unverified user ${userID} tried to generate ticket.`)
+                throw new Error('Unverified user.');
               }
-            });
-          }
+
+              return context.sudo().db.ShirtOrder.createOne({
+                data: {
+                  user: { connect: { id: userID } },
+                  size,
+                  colour,
+                  method,
+                  stripeID: stripeID ?? uuid(),
+                }
+              });
+            }
+          }),
         }
       }
     }),
     session,
     ui: {
       isAccessAllowed: permissions.canManageContent
-      // isAccessAllowed: (context) => {
-      //   console.log(context.session)
-      //   return !!context.session
-      // }
-    },
-    images: {
-      upload: 'local',
-      local: {
-        storagePath: 'public/images',
-        baseUrl: '/images',
-      },
-    },
-    files: {
-      upload: 'local',
-      local: {
-        storagePath: 'public/files',
-        baseUrl: '/files'
-      }
     },
     server: {
       port: 8000,

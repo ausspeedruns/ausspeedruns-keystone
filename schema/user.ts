@@ -1,7 +1,7 @@
 import { list } from '@keystone-6/core';
 import { checkbox, password, relationship, select, text, timestamp } from '@keystone-6/core/fields';
 import { Lists } from '.keystone/types';
-import { permissions } from './access';
+import { operations, permissions } from './access';
 import { FieldAccessControl, KeystoneContextFromListTypeInfo } from '@keystone-6/core/types';
 import { v4 as uuid } from 'uuid';
 import { differenceInMinutes } from 'date-fns';
@@ -37,8 +37,11 @@ const fieldAccess = {
 
 export const User: Lists.User = list({
 	access: {
-		filter: {
-			query: () => true
+		operation: {
+			query: () => true,
+			create: () => true,
+			update: () => true,
+			delete: operations.admin,
 		}
 	},
 	fields: {
@@ -78,9 +81,8 @@ export const User: Lists.User = list({
 			hooks: {
 				validateInput: ({ resolvedData, addValidationError, item, operation }) => {
 					if (operation === 'create') return;
-
 					const { sentVerification } = resolvedData;
-					if (item?.sentVerification && differenceInMinutes(new Date(sentVerification), new Date(item.sentVerification)) < 15) {
+					if (item?.sentVerification && differenceInMinutes(new Date(sentVerification.toString()), new Date(item.sentVerification)) < 15) {
 						addValidationError(`Sending new verification too soon.`);
 					}
 				},
@@ -132,7 +134,7 @@ export const User: Lists.User = list({
 	hooks: {
 		validateInput: ({ resolvedData, addValidationError }) => {
 			const { username } = resolvedData;
-			if (BANNEDUSERNAMES.includes(username)) {
+			if (BANNEDUSERNAMES.includes(username.toString())) {
 				addValidationError(`Username cannot be ${username}`);
 			}
 		},
@@ -144,7 +146,7 @@ export const User: Lists.User = list({
 			if (operation === 'update') {
 				// New email
 				if (item.email !== originalItem.email) {
-					context.sudo().db.User.updateOne({ where: { id: item.id }, data: { verified: false } });
+					context.sudo().db.User.updateOne({ where: { id: item.id.toString() }, data: { verified: false } });
 					SendVerification({ context, item });
 				}
 			}
@@ -156,8 +158,13 @@ export const Role = list({
 	access: {
 		filter: {
 			delete: permissions.canManageUsers,
-			// query: permissions.canManageUsers,
 			update: permissions.canManageUsers,
+		},
+		operation: {
+			query: () => true,
+			create: operations.canManageContent,
+			update: operations.canManageContent,
+			delete: operations.canManageContent,
 		}
 	},
 	ui: {

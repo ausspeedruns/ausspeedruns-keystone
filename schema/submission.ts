@@ -3,6 +3,7 @@ import { checkbox, json, relationship, select, text, timestamp } from '@keystone
 import { ItemContext, operations, permissions, SessionContext } from './access';
 import { Lists } from '.keystone/types';
 import { FieldAccessControl } from '@keystone-6/core/types';
+import { allowAll } from '@keystone-6/core/access';
 
 function roundUpToNearest5(value: number) {
 	const remainder = value % 5;
@@ -33,7 +34,8 @@ export const Submission: Lists.Submission = list({
 				if (session.data.roles?.some(role => role.canManageContent)) return true;
 				return { runner: { username: { equals: session.data.username } }, status: { equals: "submitted" } }
 			},
-		}
+		},
+		operation: allowAll
 	},
 	fields: {
 		runner: relationship({ ref: 'User.submissions', ui: { hideCreate: true, labelField: 'username' } }),
@@ -46,7 +48,7 @@ export const Submission: Lists.Submission = list({
 				resolveInput: ({ resolvedData }) => {
 					if (!resolvedData.estimate) return;
 
-					let mutableEstimate = resolvedData.estimate.split(':');
+					let mutableEstimate = resolvedData.estimate.toString().split(':');
 					// Hours
 					if (mutableEstimate[0].length === 1) {
 						mutableEstimate[0] = '0' + mutableEstimate[0];

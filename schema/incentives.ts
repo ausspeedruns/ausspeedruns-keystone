@@ -6,8 +6,10 @@ import { Lists } from '.keystone/types';
 export const Incentive: Lists.Incentive = list({
 	access: {
 		operation: {
+			query: () => true,
 			create: operations.canManageContent,
 			update: operations.canManageContent,
+			delete: operations.canManageContent,
 		}
 	},
 	fields: {

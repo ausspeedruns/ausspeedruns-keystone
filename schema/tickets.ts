@@ -1,4 +1,4 @@
-import { graphql, graphQLSchemaExtension, list } from '@keystone-6/core';
+import { graphql, list } from '@keystone-6/core';
 import { checkbox, integer, relationship, select, text, timestamp, virtual } from '@keystone-6/core/fields';
 import { operations, permissions, SessionContext } from './access';
 import { Lists } from '.keystone/types';
@@ -31,8 +31,10 @@ const filterTickets = {
 export const Ticket: Lists.Ticket = list({
 	access: {
 		operation: {
+			query: () => true,
 			create: operations.canManageContent,
 			update: operations.canManageContent,
+			delete: operations.canManageContent,
 		},
 		filter: filterTickets,
 	},
@@ -57,7 +59,7 @@ export const Ticket: Lists.Ticket = list({
 		totalCost: virtual({
 			field: graphql.field({
 				type: graphql.Float,
-				resolve: async (item, args, context) => {
+				async resolve(item, args, context) {
 					const result = await context.query.Ticket.findOne({
 						where: { id: item.id },
 						query: 'numberOfTickets'

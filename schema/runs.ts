@@ -1,13 +1,15 @@
 import { graphql, list } from '@keystone-6/core';
-import { checkbox, relationship, select, text, timestamp, virtual } from '@keystone-6/core/fields';
+import { checkbox, json, relationship, select, text, timestamp, virtual } from '@keystone-6/core/fields';
 import { operations } from './access';
 import { Lists } from '.keystone/types';
 
 export const Run: Lists.Run = list({
 	access: {
 		operation: {
-			create: operations.admin,
+			query: () => true,
+			create: operations.canManageContent,
 			update: operations.canManageContent,
+			delete: operations.canManageContent,
 		}
 	},
 	fields: {

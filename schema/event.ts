@@ -1,4 +1,5 @@
 import { list } from '@keystone-6/core';
+import { allOperations } from '@keystone-6/core/access';
 import { checkbox, float, relationship, text, timestamp } from '@keystone-6/core/fields';
 import { document } from '@keystone-6/fields-document';
 import { operations } from './access';
@@ -9,6 +10,7 @@ import { file, image } from './util';
 export const Event: Lists.Event = list({
 	access: {
 		operation: {
+			query: () => true,
 			create: operations.admin,
 			delete: operations.admin,
 			update: operations.admin,
@@ -19,7 +21,7 @@ export const Event: Lists.Event = list({
 		shortname: text({ isIndexed: 'unique' }),
 		startDate: timestamp(),
 		endDate: timestamp(),
-		eventTimezone: text({ label: 'Timezones in format of TZ database name: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones' }),
+		eventTimezone: text({ ui: { description: 'Timezones in format of TZ database name: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones' } }),
 		raised: float(),
 		submissions: relationship({ ref: 'Submission.event', many: true, access: operations.admin }),
 		runs: relationship({ ref: 'Run.event', many: true }),

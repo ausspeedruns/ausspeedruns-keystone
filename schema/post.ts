@@ -35,6 +35,7 @@ function defaultTimestamp() {
 export const Post: Lists.Post = list({
 	access: {
 		operation: {
+			query: () => true,
 			create: permissions.canManageContent,
 			delete: permissions.canManageContent,
 			update: permissions.canManageContent,

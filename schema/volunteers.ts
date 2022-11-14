@@ -3,6 +3,7 @@ import { Lists } from '.keystone/types';
 import { integer, json, relationship, select, text } from '@keystone-6/core/fields';
 import { SessionContext } from './access';
 import { availability } from './fields/availability';
+import { allowAll } from '@keystone-6/core/access';
 
 export const Volunteer: Lists.Volunteer = list({
 	access: {
@@ -22,7 +23,8 @@ export const Volunteer: Lists.Volunteer = list({
 				if (session.data.roles?.some(role => role.canManageContent)) return true;
 				return { volunteer: { username: { equals: session.data.username } }, status: { equals: "submitted" } }
 			},
-		}
+		},
+		operation: allowAll
 	},
 	fields: {
 		volunteer: relationship({ ref: 'User.volunteer', ui: { hideCreate: true, labelField: 'username' } }),
