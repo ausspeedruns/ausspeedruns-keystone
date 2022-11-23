@@ -1,11 +1,12 @@
 import { list } from '@keystone-6/core';
-import { allOperations } from '@keystone-6/core/access';
 import { checkbox, float, relationship, text, timestamp } from '@keystone-6/core/fields';
 import { document } from '@keystone-6/fields-document';
 import { operations } from './access';
 import { Lists } from '.keystone/types';
 
 import { file, image } from './util';
+
+import { componentBlocks } from '../components/BlogComponents/event-page';
 
 export const Event: Lists.Event = list({
 	access: {
@@ -58,7 +59,11 @@ export const Event: Lists.Event = list({
 				[1, 2],
 				[1, 2, 1]
 			],
-			dividers: true
+			dividers: true,
+			ui: {
+				views: './components/BlogComponents/event-page.tsx',
+			},
+			componentBlocks,
 		}),
 	}
 });
