@@ -6,7 +6,7 @@ import { Lists } from '.keystone/types';
 
 import { file, image } from './util';
 
-import { componentBlocks } from '../components/BlogComponents/event-page';
+import { componentBlocks } from '../admin/components/component-blocks/event-page';
 
 export const Event: Lists.Event = list({
 	access: {
@@ -61,7 +61,7 @@ export const Event: Lists.Event = list({
 			],
 			dividers: true,
 			ui: {
-				views: './components/BlogComponents/event-page.tsx',
+				views: './admin/components/component-blocks/event-page.tsx',
 			},
 			componentBlocks,
 		}),

@@ -1,7 +1,7 @@
 import { NavigationContainer, ListNavItems, NavItem } from '@keystone-6/core/admin-ui/components';
 import type { NavigationProps } from '@keystone-6/core/admin-ui/components';
 
-import ASIcon from '../../styles/img/AS-Icon-Orange-Admin.svg';
+import ASIcon from '../assets/AS-Icon-Orange-Admin.svg';
 
 export function CustomNavigation({ lists, authenticatedItem }: NavigationProps) {
 	return (
