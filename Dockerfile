@@ -21,7 +21,7 @@ ENV DATABASE_URL ${DATABASE_URL}
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npx keystone postinstall --fix
-RUN npm run build:keystone
+RUN npm run build
 
 # Production image, copy all the files and run keystone
 FROM node:16-alpine AS prod

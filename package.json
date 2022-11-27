@@ -2,7 +2,6 @@
   "name": "ausspeedruns-keystone",
   "private": true,
   "scripts": {
-    "postinstall": "keystone postinstall",
     "build": "keystone build",
     "dev": "keystone dev",
     "start": "keystone start",
