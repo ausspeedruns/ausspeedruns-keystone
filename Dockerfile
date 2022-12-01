@@ -41,4 +41,4 @@ COPY --from=builder /app/schema ./schema
 
 EXPOSE 8000
 
-CMD ["npm", "run", "start:keystone"]
+CMD ["npm", "run", "start"]
