@@ -634,30 +634,31 @@ type Event {
   id: ID!
   name: String
   shortname: String
-  startDate: DateTime
-  endDate: DateTime
-  eventTimezone: String
-  raised: Float
-  submissions(where: SubmissionWhereInput! = {}, orderBy: [SubmissionOrderByInput!]! = [], take: Int, skip: Int! = 0): [Submission!]
-  submissionsCount(where: SubmissionWhereInput! = {}): Int
-  runs(where: RunWhereInput! = {}, orderBy: [RunOrderByInput!]! = [], take: Int, skip: Int! = 0): [Run!]
-  runsCount(where: RunWhereInput! = {}): Int
+  published: Boolean
   acceptingSubmissions: Boolean
-  logo: AzureStorageImageFieldOutput
-  pressKit: AzureStorageFileFieldOutput
-  submissionInstructions: Event_submissionInstructions_Document
-  tickets(where: TicketWhereInput! = {}, orderBy: [TicketOrderByInput!]! = [], take: Int, skip: Int! = 0): [Ticket!]
-  ticketsCount(where: TicketWhereInput! = {}): Int
   acceptingTickets: Boolean
   scheduleReleased: Boolean
   acceptingVolunteers: Boolean
   acceptingBackups: Boolean
   acceptingShirts: Boolean
+  eventTimezone: String
+  startDate: DateTime
+  endDate: DateTime
+  raised: Float
+  submissions(where: SubmissionWhereInput! = {}, orderBy: [SubmissionOrderByInput!]! = [], take: Int, skip: Int! = 0): [Submission!]
+  submissionsCount(where: SubmissionWhereInput! = {}): Int
+  runs(where: RunWhereInput! = {}, orderBy: [RunOrderByInput!]! = [], take: Int, skip: Int! = 0): [Run!]
+  runsCount(where: RunWhereInput! = {}): Int
+  tickets(where: TicketWhereInput! = {}, orderBy: [TicketOrderByInput!]! = [], take: Int, skip: Int! = 0): [Ticket!]
+  ticketsCount(where: TicketWhereInput! = {}): Int
   volunteer(where: VolunteerWhereInput! = {}, orderBy: [VolunteerOrderByInput!]! = [], take: Int, skip: Int! = 0): [Volunteer!]
   volunteerCount(where: VolunteerWhereInput! = {}): Int
   donationIncentives(where: IncentiveWhereInput! = {}, orderBy: [IncentiveOrderByInput!]! = [], take: Int, skip: Int! = 0): [Incentive!]
   donationIncentivesCount(where: IncentiveWhereInput! = {}): Int
-  postEventPage: Event_postEventPage_Document
+  logo: AzureStorageImageFieldOutput
+  pressKit: AzureStorageFileFieldOutput
+  submissionInstructions: Event_submissionInstructions_Document
+  eventPage: Event_eventPage_Document
 }
 
 interface AzureStorageImageFieldOutput {
@@ -688,7 +689,7 @@ type Event_submissionInstructions_Document {
   document(hydrateRelationships: Boolean! = false): JSON!
 }
 
-type Event_postEventPage_Document {
+type Event_eventPage_Document {
   document(hydrateRelationships: Boolean! = false): JSON!
 }
 
@@ -721,19 +722,20 @@ input EventWhereInput {
   id: IDFilter
   name: StringFilter
   shortname: StringFilter
-  startDate: DateTimeNullableFilter
-  endDate: DateTimeNullableFilter
-  eventTimezone: StringFilter
-  raised: FloatNullableFilter
-  submissions: SubmissionManyRelationFilter
-  runs: RunManyRelationFilter
+  published: BooleanFilter
   acceptingSubmissions: BooleanFilter
-  tickets: TicketManyRelationFilter
   acceptingTickets: BooleanFilter
   scheduleReleased: BooleanFilter
   acceptingVolunteers: BooleanFilter
   acceptingBackups: BooleanFilter
   acceptingShirts: BooleanFilter
+  eventTimezone: StringFilter
+  startDate: DateTimeNullableFilter
+  endDate: DateTimeNullableFilter
+  raised: FloatNullableFilter
+  submissions: SubmissionManyRelationFilter
+  runs: RunManyRelationFilter
+  tickets: TicketManyRelationFilter
   volunteer: VolunteerManyRelationFilter
   donationIncentives: IncentiveManyRelationFilter
 }
@@ -759,40 +761,49 @@ input EventOrderByInput {
   id: OrderDirection
   name: OrderDirection
   shortname: OrderDirection
-  startDate: OrderDirection
-  endDate: OrderDirection
-  eventTimezone: OrderDirection
-  raised: OrderDirection
+  published: OrderDirection
   acceptingSubmissions: OrderDirection
   acceptingTickets: OrderDirection
   scheduleReleased: OrderDirection
   acceptingVolunteers: OrderDirection
   acceptingBackups: OrderDirection
   acceptingShirts: OrderDirection
+  eventTimezone: OrderDirection
+  startDate: OrderDirection
+  endDate: OrderDirection
+  raised: OrderDirection
 }
 
 input EventUpdateInput {
   name: String
   shortname: String
-  startDate: DateTime
-  endDate: DateTime
-  eventTimezone: String
-  raised: Float
-  submissions: SubmissionRelateToManyForUpdateInput
-  runs: RunRelateToManyForUpdateInput
+  published: Boolean
   acceptingSubmissions: Boolean
-  logo: AzureStorageImageFieldInput
-  pressKit: AzureStorageFileFieldInput
-  submissionInstructions: JSON
-  tickets: TicketRelateToManyForUpdateInput
   acceptingTickets: Boolean
   scheduleReleased: Boolean
   acceptingVolunteers: Boolean
   acceptingBackups: Boolean
   acceptingShirts: Boolean
+  eventTimezone: String
+  startDate: DateTime
+  endDate: DateTime
+  raised: Float
+  submissions: SubmissionRelateToManyForUpdateInput
+  runs: RunRelateToManyForUpdateInput
+  tickets: TicketRelateToManyForUpdateInput
   volunteer: VolunteerRelateToManyForUpdateInput
   donationIncentives: IncentiveRelateToManyForUpdateInput
-  postEventPage: JSON
+  logo: AzureStorageImageFieldInput
+  pressKit: AzureStorageFileFieldInput
+  submissionInstructions: JSON
+  eventPage: JSON
+}
+
+input IncentiveRelateToManyForUpdateInput {
+  disconnect: [IncentiveWhereUniqueInput!]
+  set: [IncentiveWhereUniqueInput!]
+  create: [IncentiveCreateInput!]
+  connect: [IncentiveWhereUniqueInput!]
 }
 
 input AzureStorageImageFieldInput {
@@ -808,13 +819,6 @@ input AzureStorageFileFieldInput {
   ref: String
 }
 
-input IncentiveRelateToManyForUpdateInput {
-  disconnect: [IncentiveWhereUniqueInput!]
-  set: [IncentiveWhereUniqueInput!]
-  create: [IncentiveCreateInput!]
-  connect: [IncentiveWhereUniqueInput!]
-}
-
 input EventUpdateArgs {
   where: EventWhereUniqueInput!
   data: EventUpdateInput!
@@ -823,25 +827,26 @@ input EventUpdateArgs {
 input EventCreateInput {
   name: String
   shortname: String
-  startDate: DateTime
-  endDate: DateTime
-  eventTimezone: String
-  raised: Float
-  submissions: SubmissionRelateToManyForCreateInput
-  runs: RunRelateToManyForCreateInput
+  published: Boolean
   acceptingSubmissions: Boolean
-  logo: AzureStorageImageFieldInput
-  pressKit: AzureStorageFileFieldInput
-  submissionInstructions: JSON
-  tickets: TicketRelateToManyForCreateInput
   acceptingTickets: Boolean
   scheduleReleased: Boolean
   acceptingVolunteers: Boolean
   acceptingBackups: Boolean
   acceptingShirts: Boolean
+  eventTimezone: String
+  startDate: DateTime
+  endDate: DateTime
+  raised: Float
+  submissions: SubmissionRelateToManyForCreateInput
+  runs: RunRelateToManyForCreateInput
+  tickets: TicketRelateToManyForCreateInput
   volunteer: VolunteerRelateToManyForCreateInput
   donationIncentives: IncentiveRelateToManyForCreateInput
-  postEventPage: JSON
+  logo: AzureStorageImageFieldInput
+  pressKit: AzureStorageFileFieldInput
+  submissionInstructions: JSON
+  eventPage: JSON
 }
 
 input IncentiveRelateToManyForCreateInput {
@@ -1679,9 +1684,10 @@ type KeystoneAdminUIListMeta {
   pageSize: Int!
   labelField: String!
   fields: [KeystoneAdminUIFieldMeta!]!
+  groups: [KeystoneAdminUIFieldGroupMeta!]!
   initialSort: KeystoneAdminUISort
   isHidden: Boolean!
-  isSingleton: Boolean
+  isSingleton: Boolean!
 }
 
 type KeystoneAdminUIFieldMeta {
@@ -1719,12 +1725,24 @@ enum KeystoneAdminUIFieldMetaListViewFieldMode {
 
 type KeystoneAdminUIFieldMetaItemView {
   fieldMode: KeystoneAdminUIFieldMetaItemViewFieldMode
+  fieldPosition: KeystoneAdminUIFieldMetaItemViewFieldPosition
 }
 
 enum KeystoneAdminUIFieldMetaItemViewFieldMode {
   edit
   read
   hidden
+}
+
+enum KeystoneAdminUIFieldMetaItemViewFieldPosition {
+  form
+  sidebar
+}
+
+type KeystoneAdminUIFieldGroupMeta {
+  label: String!
+  description: String
+  fields: [KeystoneAdminUIFieldMeta!]!
 }
 
 type KeystoneAdminUISort {

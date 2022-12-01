@@ -87,13 +87,22 @@ model Event {
   id                     String       @id @default(cuid())
   name                   String       @default("")
   shortname              String       @unique @default("")
+  published              Boolean      @default(false)
+  acceptingSubmissions   Boolean      @default(false)
+  acceptingTickets       Boolean      @default(false)
+  scheduleReleased       Boolean      @default(false)
+  acceptingVolunteers    Boolean      @default(false)
+  acceptingBackups       Boolean      @default(false)
+  acceptingShirts        Boolean      @default(false)
+  eventTimezone          String       @default("")
   startDate              DateTime?
   endDate                DateTime?
-  eventTimezone          String       @default("")
   raised                 Float?
   submissions            Submission[] @relation("Submission_event")
   runs                   Run[]        @relation("Run_event")
-  acceptingSubmissions   Boolean      @default(false)
+  tickets                Ticket[]     @relation("Ticket_event")
+  volunteer              Volunteer[]  @relation("Volunteer_event")
+  donationIncentives     Incentive[]  @relation("Incentive_event")
   logo_filesize          Int?
   logo_extension         String?
   logo_width             Int?
@@ -102,15 +111,7 @@ model Event {
   pressKit_filename      String?
   pressKit_filesize      Int?
   submissionInstructions Json         @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
-  tickets                Ticket[]     @relation("Ticket_event")
-  acceptingTickets       Boolean      @default(false)
-  scheduleReleased       Boolean      @default(false)
-  acceptingVolunteers    Boolean      @default(false)
-  acceptingBackups       Boolean      @default(false)
-  acceptingShirts        Boolean      @default(false)
-  volunteer              Volunteer[]  @relation("Volunteer_event")
-  donationIncentives     Incentive[]  @relation("Incentive_event")
-  postEventPage          Json         @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
+  eventPage              Json         @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
   from_Post_event        Post[]       @relation("Post_event")
   from_Role_event        Role[]       @relation("Role_event")
 }

@@ -134,7 +134,7 @@ export const User: Lists.User = list({
 	hooks: {
 		validateInput: ({ resolvedData, addValidationError }) => {
 			const { username } = resolvedData;
-			if (BANNEDUSERNAMES.includes(username.toString())) {
+			if (username && BANNEDUSERNAMES.includes(username.toString())) {
 				addValidationError(`Username cannot be ${username}`);
 			}
 		},
