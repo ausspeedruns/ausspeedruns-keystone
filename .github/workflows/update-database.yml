@@ -27,4 +27,6 @@ jobs:
       -
         name: Update prisma
         run: npx keystone prisma migrate deploy
+        env:
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
 
