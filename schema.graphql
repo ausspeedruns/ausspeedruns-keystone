@@ -1580,10 +1580,6 @@ type Mutation {
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
   sendUserPasswordResetLink(email: String!): Boolean!
   redeemUserPasswordResetToken(email: String!, token: String!, password: String!): RedeemUserPasswordResetTokenResult
-  confirmStripe(stripeID: String!, numberOfTickets: Int!, apiKey: String!): Ticket
-  generateTicket(userID: ID!, numberOfTickets: Int!, method: TicketMethodType!, event: String!, stripeID: String, apiKey: String!): Ticket
-  confirmShirtStripe(stripeID: String!, apiKey: String!): ShirtOrder
-  generateShirt(userID: ID!, size: ShirtOrderSizeType!, method: TicketMethodType!, colour: ShirtOrderColourType!, stripeID: String, apiKey: String!): ShirtOrder
 }
 
 union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure

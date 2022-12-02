@@ -82,7 +82,7 @@ export const User: Lists.User = list({
 				validateInput: ({ resolvedData, addValidationError, item, operation }) => {
 					if (operation === 'create') return;
 					const { sentVerification } = resolvedData;
-					if (item?.sentVerification && differenceInMinutes(new Date(sentVerification.toString()), new Date(item.sentVerification)) < 15) {
+					if (item?.sentVerification && sentVerification && differenceInMinutes(new Date(sentVerification.toString()), new Date(item.sentVerification)) < 15) {
 						addValidationError(`Sending new verification too soon.`);
 					}
 				},
@@ -134,7 +134,7 @@ export const User: Lists.User = list({
 	hooks: {
 		validateInput: ({ resolvedData, addValidationError }) => {
 			const { username } = resolvedData;
-			if (username && BANNEDUSERNAMES.includes(username.toString())) {
+			if (username && BANNEDUSERNAMES.includes(username?.toString() ?? "")) {
 				addValidationError(`Username cannot be ${username}`);
 			}
 		},
