@@ -223,6 +223,7 @@ export const componentBlocks = {
 				cover: fields.checkbox({ label: 'Background Cover?', defaultValue: true }),
 				repeat: fields.text({ label: 'Background Repeat', defaultValue: 'no-repeat' }),
 			}),
+			eventLogoBackup: fields.url({ label: 'Event Logo Backup' }),
 			donateLink: fields.url({ label: 'Donate URL' }),
 			charityLink: fields.url({ label: 'Charity URL' }),
 			ticketLink: fields.text({ label: 'Ticket Link' }),
