@@ -1,5 +1,6 @@
 /** @jsxRuntime classic */
 /** @jsx jsx */
+/** @jsxFrag */
 
 import { jsx, Heading } from '@keystone-ui/core';
 import React, { useEffect, useRef, useState } from 'react';
@@ -373,8 +374,12 @@ interface UploadedSchedule {
 	willingBackup: string;
 	id: string;
 	runnerId: string;
+	youtubeVOD?: string;
+	twitchVOD?: string;
+	finalTime?: string;
 }
 
+// Converts all keystone submissions to a CSV to download.
 function parseSubmissionsToCSV(submissionData: EventSubmissions) {
 	const csvData = submissionData.event.submissions.map((submission) => {
 		const flattenedSubmission = {
@@ -403,6 +408,7 @@ function parseSubmissionsToCSV(submissionData: EventSubmissions) {
 	return new Blob([papaCSV], { type: 'text/csv;charset=utf-8;' });
 }
 
+// Read the CSV
 async function parseScheduleToRuns(file: File, eventSettings: { startTime: Date; turnaroundTime: number }) {
 	return new Promise<Awaited<ReturnType<typeof csvToRuns>>>((resolve, reject) => {
 		Papa.parse<UploadedSchedule>(file, {
@@ -432,7 +438,13 @@ async function parseScheduleToRuns(file: File, eventSettings: { startTime: Date;
 		race
 		racer
 		coop
+	
+	CSV does not require but will add:
+		youtubeVOD
+		twitchVOD
+		finalTime
 */
+// Convert the CSV data to object data
 async function csvToRuns(csvResults: UploadedSchedule[], eventSettings: { startTime: Date; turnaroundTime: number }) {
 	// Get all runner names
 	const runnerNames = await getRunners(csvResults.map((submission) => submission.runnerId));
@@ -459,6 +471,12 @@ async function csvToRuns(csvResults: UploadedSchedule[], eventSettings: { startT
 			};
 		}
 
+		let extraData: { youtubeVOD?: string; twitchVOD?: string; finalTime?: string } = {};
+
+		if (submission.youtubeVOD) extraData.youtubeVOD = submission.youtubeVOD;
+		if (submission.twitchVOD) extraData.twitchVOD = submission.twitchVOD;
+		if (submission.finalTime) extraData.finalTime = submission.finalTime;
+
 		return {
 			runnerId: submission.runnerId,
 			runner: [runner],
@@ -478,10 +496,12 @@ async function csvToRuns(csvResults: UploadedSchedule[], eventSettings: { startT
 			internalRunner: submission.runner,
 			scheduled: scheduledTime,
 			uuid: uuid(),
+			...extraData,
 		};
 	});
 }
 
+// Given the estimate and start time, get when the run ends as a date
 function endRunTime(scheduled: Date, estimate: string) {
 	const estimateParts = estimate.split(/:/);
 	const estimateMillis = parseInt(estimateParts[0], 10) * 60 * 60 * 1000 + parseInt(estimateParts[1], 10) * 60 * 1000;
@@ -492,6 +512,7 @@ function endRunTime(scheduled: Date, estimate: string) {
 	return scheduledTime;
 }
 
+// Query all users
 async function getRunners(runnersID: string[]) {
 	const client = new ApolloClient({ uri: '/api/graphql', cache: new InMemoryCache() });
 	try {
@@ -510,6 +531,7 @@ interface ReturnedIncentives {
 	submissionId: string;
 }
 
+// Create the mutation command to send to the server to create all the runs, incentives and update miscellanious stuff
 async function createSchedule(
 	runs: Awaited<ReturnType<typeof csvToRuns>>,
 	eventShortname: string,
@@ -518,7 +540,9 @@ async function createSchedule(
 ) {
 	const client = new ApolloClient({ uri: '/api/graphql', cache: new InMemoryCache() });
 	try {
-		// Create runs
+		/****************/
+		/* CREATE RUNS */
+		/**************/
 		const finalRuns = runs.map((run) => {
 			let connectedSubmission;
 			if (run.submissionId) {
@@ -565,6 +589,9 @@ async function createSchedule(
 				race: run.race === 'RACE' || run.race === 'COOP',
 				coop: run.race === 'COOP',
 				event: { connect: { shortname: eventShortname } },
+				...(run.finalTime && {finalTime: run.finalTime}),
+				...(run.youtubeVOD && {youtubeVOD: run.youtubeVOD}),
+				...(run.twitchVOD && {twitchVOD: run.twitchVOD}),
 			};
 		});
 
@@ -575,7 +602,9 @@ async function createSchedule(
 			variables: { runs: finalRuns },
 		});
 
-		// Create donation incentives
+		/*******************************/
+		/* CREATE DONATION INCENTIVES */
+		/*****************************/
 		const donationIncentives = finalIncentives.map((incentive) => {
 			const originalRun = allRuns.data.createRuns.find(
 				(run) => run.originalSubmission?.id === incentive.submissionId
@@ -610,6 +639,9 @@ async function createSchedule(
 
 		console.log(allRuns);
 
+		/**************************/
+		/* UPDATE END EVENT TIME */
+		/************************/
 		const updatedEventTime = await client.mutate<UpdateEventEnd>({
 			mutation: UPDATE_EVENT_END,
 			variables: {
@@ -627,6 +659,7 @@ async function createSchedule(
 			}
 		);
 
+		// Final checks to see if anything failedw
 		if (allRuns?.errors?.length > 0) {
 			throw allRuns.errors;
 		} else if (allIncentives?.errors?.length > 0) {

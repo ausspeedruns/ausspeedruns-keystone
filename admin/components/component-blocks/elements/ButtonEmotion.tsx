@@ -2,7 +2,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { HTMLAttributeAnchorTarget } from 'react';
 import styled from '@emotion/styled';
-import { Colours, Theme } from './colors';
+import { Colours, Theme } from '../../colors';
 
 export type ButtonProps = {
 	actionText: string;
@@ -19,6 +19,7 @@ export type ButtonProps = {
 	target?: HTMLAttributeAnchorTarget;
 	rel?: string;
 	type?: string;
+	faIcon?: string;
 };
 
 const ButtonLink = styled.a`
@@ -145,7 +146,7 @@ const Button = ({
 	rel,
 	colorScheme = 'primary',
 	target = '_self',
-	type,
+	type
 }: ButtonProps) => {
 	return (
 		<ButtonLink className={colorScheme} href={link} target={target} rel={rel} type={type}>

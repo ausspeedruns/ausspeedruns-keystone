@@ -7,7 +7,7 @@ const azureConfig: AzureStorageConfig = {
 		account: process.env.AZURE_STORAGE_ACCOUNT_NAME,
 		accessKey: process.env.AZURE_STORAGE_KEY,
 		container: process.env.AZURE_STORAGE_CONTAINER,
-		url: process.env.NODE_ENV === 'production' ? '' : `http://localhost:9999/${process.env.AZURE_STORAGE_ACCOUNT_NAME}`
+		url: process.env.NODE_ENV === 'production' ? '' : `http://127.0.0.1:9999/${process.env.AZURE_STORAGE_ACCOUNT_NAME}`
 	},
 }
 

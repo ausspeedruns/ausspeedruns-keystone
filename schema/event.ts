@@ -6,7 +6,8 @@ import { Lists } from '.keystone/types';
 
 import { file, image } from './util';
 
-import { componentBlocks } from '../admin/components/component-blocks/event-page';
+import { componentBlocks as liveEventComponentBlocks } from '../admin/components/component-blocks/event-page';
+import { componentBlocks as postEventComponentBlocks } from '../admin/components/component-blocks/post-event';
 
 export const Event: Lists.Event = list({
 	access: {
@@ -47,6 +48,22 @@ export const Event: Lists.Event = list({
 			label: "Post event data",
 			fields: {
 				raised: float(),
+				postEventPage: document({
+					formatting: true,
+					links: true,
+					layouts: [
+						[1, 1],
+						[1, 1, 1],
+						[2, 1],
+						[1, 2],
+						[1, 2, 1]
+					],
+					dividers: true,
+					ui: {
+						views: './admin/components/component-blocks/post-event.tsx',
+					},
+					componentBlocks: postEventComponentBlocks,
+				}),
 			}
 		}),
 		...group({
@@ -60,8 +77,26 @@ export const Event: Lists.Event = list({
 				donationIncentives: relationship({ ref: 'Incentive.event', many: true }),
 			}
 		}),
-		logo: image<Lists.Event.TypeInfo>(),
-		pressKit: file<Lists.Event.TypeInfo>(),
+		...group({
+			label: "Media",
+			fields: {
+				logo: image<Lists.Event.TypeInfo>(),
+				darkModeLogo: image<Lists.Event.TypeInfo>(),
+				heroImage: image<Lists.Event.TypeInfo>({
+					ui: { description: "Image that will be used as the background for the homepage and events list." },
+					storage: ''
+				}),
+				ogImage: image<Lists.Event.TypeInfo>({
+					ui: { description: "Open Graph Image that will be embedded when linked. 1200x630" },
+					storage: ''
+				}),
+				postEventBackground: image<Lists.Event.TypeInfo>({
+					ui: { description: "Background for the post event page. It will be centered, repeated on the y axis and set to cover." },
+					storage: ''
+				}),
+				pressKit: file<Lists.Event.TypeInfo>(),
+			}
+		}),
 		submissionInstructions: document({
 			formatting: true,
 			links: true,
@@ -88,7 +123,7 @@ export const Event: Lists.Event = list({
 			ui: {
 				views: './admin/components/component-blocks/event-page.tsx',
 			},
-			componentBlocks,
+			componentBlocks: liveEventComponentBlocks,
 		}),
 	}
 });

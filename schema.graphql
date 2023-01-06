@@ -645,6 +645,7 @@ type Event {
   startDate: DateTime
   endDate: DateTime
   raised: Float
+  postEventPage: Event_postEventPage_Document
   submissions(where: SubmissionWhereInput! = {}, orderBy: [SubmissionOrderByInput!]! = [], take: Int, skip: Int! = 0): [Submission!]
   submissionsCount(where: SubmissionWhereInput! = {}): Int
   runs(where: RunWhereInput! = {}, orderBy: [RunOrderByInput!]! = [], take: Int, skip: Int! = 0): [Run!]
@@ -656,9 +657,17 @@ type Event {
   donationIncentives(where: IncentiveWhereInput! = {}, orderBy: [IncentiveOrderByInput!]! = [], take: Int, skip: Int! = 0): [Incentive!]
   donationIncentivesCount(where: IncentiveWhereInput! = {}): Int
   logo: AzureStorageImageFieldOutput
+  darkModeLogo: AzureStorageImageFieldOutput
+  heroImage: AzureStorageImageFieldOutput
+  ogImage: AzureStorageImageFieldOutput
+  postEventBackground: AzureStorageImageFieldOutput
   pressKit: AzureStorageFileFieldOutput
   submissionInstructions: Event_submissionInstructions_Document
   eventPage: Event_eventPage_Document
+}
+
+type Event_postEventPage_Document {
+  document(hydrateRelationships: Boolean! = false): JSON!
 }
 
 interface AzureStorageImageFieldOutput {
@@ -788,12 +797,17 @@ input EventUpdateInput {
   startDate: DateTime
   endDate: DateTime
   raised: Float
+  postEventPage: JSON
   submissions: SubmissionRelateToManyForUpdateInput
   runs: RunRelateToManyForUpdateInput
   tickets: TicketRelateToManyForUpdateInput
   volunteer: VolunteerRelateToManyForUpdateInput
   donationIncentives: IncentiveRelateToManyForUpdateInput
   logo: AzureStorageImageFieldInput
+  darkModeLogo: AzureStorageImageFieldInput
+  heroImage: AzureStorageImageFieldInput
+  ogImage: AzureStorageImageFieldInput
+  postEventBackground: AzureStorageImageFieldInput
   pressKit: AzureStorageFileFieldInput
   submissionInstructions: JSON
   eventPage: JSON
@@ -838,12 +852,17 @@ input EventCreateInput {
   startDate: DateTime
   endDate: DateTime
   raised: Float
+  postEventPage: JSON
   submissions: SubmissionRelateToManyForCreateInput
   runs: RunRelateToManyForCreateInput
   tickets: TicketRelateToManyForCreateInput
   volunteer: VolunteerRelateToManyForCreateInput
   donationIncentives: IncentiveRelateToManyForCreateInput
   logo: AzureStorageImageFieldInput
+  darkModeLogo: AzureStorageImageFieldInput
+  heroImage: AzureStorageImageFieldInput
+  ogImage: AzureStorageImageFieldInput
+  postEventBackground: AzureStorageImageFieldInput
   pressKit: AzureStorageFileFieldInput
   submissionInstructions: JSON
   eventPage: JSON

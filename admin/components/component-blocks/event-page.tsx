@@ -3,9 +3,20 @@ import { NotEditable, component, fields } from '@keystone-6/fields-document/comp
 
 import styled from '@emotion/styled';
 import Image from 'next/image';
-import Button from '../ButtonEmotion';
-import { faArrowRight, faTicket, faCalendar, faPerson, faShirt } from '@fortawesome/free-solid-svg-icons';
+import Button from './elements/ButtonEmotion';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+	faArrowRight,
+	faTicket,
+	faCalendar,
+	faPerson,
+	faShirt,
+	IconName,
+	fas,
+} from '@fortawesome/free-solid-svg-icons';
 import { Theme, Media } from '../colors';
+
+library.add(fas);
 
 interface HeaderProps {
 	image: string;
@@ -145,11 +156,32 @@ const SoloImage = styled.img`
 	object-fit: cover;
 `;
 
+const EventLogo = styled.img`
+	max-width: 50%;
+	max-height: 5rem;
+	object-fit: contain;
+`;
+
+const AmountRaisedValue = styled.span`
+	font-weight: bold;
+	font-size: 2rem;
+`;
+
+const AmountRaisedImage = styled.img`
+	max-height: 100%;
+	max-width: 30%;
+	object-fit: contain;
+`;
+
 // naming the export componentBlocks is important because the Admin UI
 // expects to find the components like on the componentBlocks export
 export const componentBlocks = {
 	header: component({
 		preview(props) {
+			const openInNewTabProps = {
+				target: '_blank',
+				rel: 'noopener noreferrer',
+			};
 			return (
 				<HeaderContainer
 					contentEditable={false}
@@ -158,6 +190,13 @@ export const componentBlocks = {
 					cover={props.fields.backgroundSettings.fields.cover.value}
 					repeat={props.fields.backgroundSettings.fields.repeat.value}
 				>
+					{/* <link
+						rel="stylesheet"
+						href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/solid.min.css"
+						integrity="sha512-6mc0R607di/biCutMUtU9K7NtNewiGQzrvWX4bWTeqmljZdJrwYvKJtnhgR+Ryvj+NRJ8+NnnCM/biGqMe/iRA=="
+						crossOrigin="anonymous"
+						referrerPolicy="no-referrer"
+					/> */}
 					<HeaderLogo>
 						{/* <Image src={props.fields.event?.value?.data?.logo ?? ''} alt="AusSpeedruns At PAX 2022 Logo" /> */}
 					</HeaderLogo>
@@ -205,6 +244,18 @@ export const componentBlocks = {
 							target="_blank"
 							rel="noopener noreferrer"
 						/>
+
+						{props.fields.buttons.elements.map((button, i) => {
+							return (
+								<Button
+									key={i}
+									actionText={button.fields.text.value}
+									link={button.fields.link.value}
+									iconRight={button.fields.icon.value as IconName}
+									{...(button.fields.openInNewTab.value ? openInNewTabProps : undefined)}
+								/>
+							);
+						})}
 					</ButtonContainer>
 				</HeaderContainer>
 			);
@@ -227,6 +278,14 @@ export const componentBlocks = {
 			donateLink: fields.url({ label: 'Donate URL' }),
 			charityLink: fields.url({ label: 'Charity URL' }),
 			ticketLink: fields.text({ label: 'Ticket Link' }),
+			buttons: fields.array(
+				fields.object({
+					text: fields.text({ label: 'Text' }),
+					link: fields.text({ label: 'Link' }),
+					icon: fields.text({ label: 'FA Icon' }),
+					openInNewTab: fields.checkbox({ label: 'Open in new tab? ' }),
+				})
+			),
 		},
 	}),
 	imageParagraph: component({
@@ -297,6 +356,47 @@ export const componentBlocks = {
 		schema: {
 			url: fields.url({ label: 'Image URL' }),
 			height: fields.text({ label: 'Height', defaultValue: '30rem' }),
+		},
+	}),
+	eventLogo: component({
+		preview(props) {
+			return <EventLogo src={props.fields.url.value} alt={props.fields.altText.value} />;
+		},
+		label: 'Event Logo',
+		schema: {
+			url: fields.url({ label: 'Logo URL' }),
+			altText: fields.text({ label: 'Alt text' }),
+		},
+	}),
+	raisedAmount: component({
+		preview(props) {
+			return (
+				<div>
+					<AmountRaisedValue>{props.fields.amount.value}</AmountRaisedValue>
+					<span> raised for </span>
+					<AmountRaisedImage src={props.fields.charityImage.value} alt={props.fields.charityName.value} />
+				</div>
+			);
+		},
+		label: 'Raised Amount',
+		schema: {
+			charityName: fields.text({ label: 'Charity Name ' }),
+			charityImage: fields.url({ label: 'Charity URL' }),
+			amount: fields.text({ label: 'Amount Raised' }),
+		},
+	}),
+	allRuns: component({
+		preview(props) {
+			return <NotEditable>Big ol block here lol</NotEditable>;
+		},
+		label: 'All runs list',
+		schema: {
+			event: fields.relationship({
+				label: 'Event',
+				listKey: 'Event',
+				selection:
+					'id startDate shortname runs(orderBy: { scheduledTime: asc }) { id game category runners { id username } finalTime platform youtubeVOD twitchVOD }',
+			}),
 		},
 	}),
 };

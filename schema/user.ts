@@ -46,7 +46,7 @@ export const User: Lists.User = list({
 	},
 	fields: {
 		name: text({ access: fieldAccess.editSelfOrHidden, validation: { length: { max: 100 } }, ui: { itemView: { fieldMode: fieldModes.editSelfOrHidden } } }),
-		username: text({ isIndexed: 'unique', validation: { isRequired: true, match: { regex: /^[a-zA-Z0-9_][\w]{2,24}$/, explanation: 'Username must be 3-25 characters long and can only have: letters, numbers and underscore' } }, access: fieldAccess.editSelfOrRead, ui: { itemView: { fieldMode: fieldModes.editSelfOrRead } } }),
+		username: text({ isIndexed: 'unique', validation: { isRequired: true, match: { regex: /^[a-zA-Z0-9_-][\w-]{2,24}$/, explanation: 'Username must be 3-25 characters long and can only have: letters, numbers and underscore' } }, access: fieldAccess.editSelfOrRead, ui: { itemView: { fieldMode: fieldModes.editSelfOrRead } } }),
 		email: text({ isIndexed: 'unique', validation: { isRequired: true }, access: fieldAccess.editSelfOrHidden, ui: { itemView: { fieldMode: fieldModes.editSelfOrHidden } } }),
 		password: password({ validation: { isRequired: true } }),
 		accountCreated: timestamp({ defaultValue: { kind: 'now' }, access: fieldAccess.readSelfOrHidden }),

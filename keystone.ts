@@ -2,7 +2,6 @@ import 'dotenv/config';
 import { config, graphql } from '@keystone-6/core';
 import { statelessSessions } from '@keystone-6/core/session';
 import { createAuth } from '@keystone-6/auth';
-import { v4 as uuid } from 'uuid';
 
 import { Role, User } from './schema/user';
 import { Submission } from './schema/submission';
@@ -18,7 +17,7 @@ import { Context } from '.keystone/types';
 import { Volunteer } from './schema/volunteers';
 import { ShirtOrder } from './schema/orders';
 import { Incentive } from './schema/incentives';
-import { gql } from '@keystone-6/core/admin-ui/apollo';
+import { insertSeedData } from './seed/seed';
 
 const session = statelessSessions({
   secret: process.env.SESSION_SECRET,
@@ -56,7 +55,16 @@ const { withAuth } = createAuth({
 
 export default withAuth(
   config({
-    db: { provider: 'postgresql', url: process.env.DATABASE_URL, useMigrations: true },
+    db: {
+      provider: 'postgresql',
+      url: process.env.DATABASE_URL,
+      useMigrations: true,
+      async onConnect(context: Context) {
+        if (process.argv.includes('--seed-data')) {
+          await insertSeedData(context.sudo());
+        }
+      },
+    },
     experimental: {
       generateNextGraphqlAPI: true,
     },

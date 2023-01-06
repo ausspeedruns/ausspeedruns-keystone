@@ -84,36 +84,57 @@ model Submission {
 }
 
 model Event {
-  id                     String       @id @default(cuid())
-  name                   String       @default("")
-  shortname              String       @unique @default("")
-  published              Boolean      @default(false)
-  acceptingSubmissions   Boolean      @default(false)
-  acceptingTickets       Boolean      @default(false)
-  scheduleReleased       Boolean      @default(false)
-  acceptingVolunteers    Boolean      @default(false)
-  acceptingBackups       Boolean      @default(false)
-  acceptingShirts        Boolean      @default(false)
-  eventTimezone          String       @default("")
-  startDate              DateTime?
-  endDate                DateTime?
-  raised                 Float?
-  submissions            Submission[] @relation("Submission_event")
-  runs                   Run[]        @relation("Run_event")
-  tickets                Ticket[]     @relation("Ticket_event")
-  volunteer              Volunteer[]  @relation("Volunteer_event")
-  donationIncentives     Incentive[]  @relation("Incentive_event")
-  logo_filesize          Int?
-  logo_extension         String?
-  logo_width             Int?
-  logo_height            Int?
-  logo_id                String?
-  pressKit_filename      String?
-  pressKit_filesize      Int?
-  submissionInstructions Json         @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
-  eventPage              Json         @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
-  from_Post_event        Post[]       @relation("Post_event")
-  from_Role_event        Role[]       @relation("Role_event")
+  id                            String       @id @default(cuid())
+  name                          String       @default("")
+  shortname                     String       @unique @default("")
+  published                     Boolean      @default(false)
+  acceptingSubmissions          Boolean      @default(false)
+  acceptingTickets              Boolean      @default(false)
+  scheduleReleased              Boolean      @default(false)
+  acceptingVolunteers           Boolean      @default(false)
+  acceptingBackups              Boolean      @default(false)
+  acceptingShirts               Boolean      @default(false)
+  eventTimezone                 String       @default("")
+  startDate                     DateTime?
+  endDate                       DateTime?
+  raised                        Float?
+  postEventPage                 Json         @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
+  submissions                   Submission[] @relation("Submission_event")
+  runs                          Run[]        @relation("Run_event")
+  tickets                       Ticket[]     @relation("Ticket_event")
+  volunteer                     Volunteer[]  @relation("Volunteer_event")
+  donationIncentives            Incentive[]  @relation("Incentive_event")
+  logo_filesize                 Int?
+  logo_extension                String?
+  logo_width                    Int?
+  logo_height                   Int?
+  logo_id                       String?
+  darkModeLogo_filesize         Int?
+  darkModeLogo_extension        String?
+  darkModeLogo_width            Int?
+  darkModeLogo_height           Int?
+  darkModeLogo_id               String?
+  heroImage_filesize            Int?
+  heroImage_extension           String?
+  heroImage_width               Int?
+  heroImage_height              Int?
+  heroImage_id                  String?
+  ogImage_filesize              Int?
+  ogImage_extension             String?
+  ogImage_width                 Int?
+  ogImage_height                Int?
+  ogImage_id                    String?
+  postEventBackground_filesize  Int?
+  postEventBackground_extension String?
+  postEventBackground_width     Int?
+  postEventBackground_height    Int?
+  postEventBackground_id        String?
+  pressKit_filename             String?
+  pressKit_filesize             Int?
+  submissionInstructions        Json         @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
+  eventPage                     Json         @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
+  from_Post_event               Post[]       @relation("Post_event")
+  from_Role_event               Role[]       @relation("Role_event")
 }
 
 model Role {

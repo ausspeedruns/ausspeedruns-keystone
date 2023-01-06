@@ -5,15 +5,8 @@ import { Lists } from '.keystone/types';
 import { FieldAccessControl } from '@keystone-6/core/types';
 import { allowAll } from '@keystone-6/core/access';
 
-function roundUpToNearest5(value: number) {
-	const remainder = value % 5;
-	let round = value;
-
-	if (remainder !== 0) {
-		round += 5 - remainder
-	}
-
-	return round;
+function roundUpToNearest5(num: number) {
+	return Math.ceil(num / 5) * 5;
 }
 
 export const Submission: Lists.Submission = list({
@@ -48,23 +41,10 @@ export const Submission: Lists.Submission = list({
 				resolveInput: ({ resolvedData }) => {
 					if (!resolvedData.estimate) return;
 
-					let mutableEstimate = resolvedData.estimate.toString().split(':');
-					// Hours
-					if (mutableEstimate[0].length === 1) {
-						mutableEstimate[0] = '0' + mutableEstimate[0];
-					}
-
-					// Remove seconds
-					mutableEstimate[2] = '00';
-
-					// Round up mins
-					mutableEstimate[1] = roundUpToNearest5(parseInt(mutableEstimate[1])).toString();
-
-					if (mutableEstimate[1].length === 1) {
-						mutableEstimate[1] = '0' + mutableEstimate[1];
-					}
-
-					return mutableEstimate.join(':');
+					const [hours, minutes] = resolvedData.estimate.toString().split(':').map(Number);
+					const newMinutes = Math.ceil(minutes / 5) * 5;
+					const newHours = hours + Math.floor(newMinutes / 60);
+					return `${newHours.toString().padStart(2, '0')}:${(newMinutes % 60).toString().padStart(2, "0")}:00`;
 				}
 			}
 		}),

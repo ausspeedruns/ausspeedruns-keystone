@@ -246,7 +246,7 @@ export default function RunsManager() {
 							}}
 							itemCount={eventData.data.event.runsCount}
 							overscanCount={5}
-							itemData={eventData.data.event.runs.map((run) => ({ ...run, setSelectedRunIndex }))}
+							itemData={eventData.data.event.runs.map((run: any) => ({ ...run, setSelectedRunIndex }))}
 							css={{ borderRight: '1px solid #e1e5e9', background: '#fafbfc' }}
 						>
 							{renderRunRow}
