@@ -65,7 +65,7 @@ export const componentBlocks = {
 			amount: fields.text({ label: 'Amount Raised' }),
 		},
 	}),
-	allRuns: component({
+	AllRuns: component({
 		preview(props) {
 			return <NotEditable>Big ol block here lol</NotEditable>;
 		},
