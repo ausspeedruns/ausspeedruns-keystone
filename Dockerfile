@@ -4,8 +4,6 @@ FROM node:16-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN apk add --no-cache libc6-compat
-RUN apk add --no-cache openssl1.1-compat-dev
 RUN npm ci
 
 # Rebuild the source code only when needed
@@ -22,6 +20,7 @@ ENV DATABASE_URL ${DATABASE_URL}
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+RUN apk add --update --no-cache openssl1.1-compat
 RUN npx keystone postinstall --fix
 RUN npm run build
 
