@@ -40,7 +40,7 @@ The format for the required items in the .env file are as such.
 
 ```.env
 # Azure Storage
-AZURE_STORAGE_ACCOUNT_NAME="ausruns-dev"
+AZURE_STORAGE_ACCOUNT_NAME="devstoreaccount1"
 AZURE_STORAGE_KEY="<Azure storage key>"
 AZURE_STORAGE_CONTAINER="<Azure storage container>"
 
@@ -65,7 +65,7 @@ API_KEY="<Api key>"
 
 ## Seed data
 
-**RUN THE STARTUP ONCE BEFORE RUNNING THE SEEDING SCRIPT**. This is to generate an admin user which is yourself.
+**RUN THE STARTUP ONCE BEFORE RUNNING THE SEEDING SCRIPT**. This is to generate an admin user which is yourself. Then run `npm run seed`.
 
 There is a seeding script that has:
 

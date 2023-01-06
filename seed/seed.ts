@@ -3,13 +3,13 @@ import { Context } from '.keystone/types';
 // import { prepareToUpload } from './parseToUpload';
 
 const SeedSettings = {
-	events: false,
-	users: false,
-	roles: false,
-	submissions: false,
-	runs: false,
-	incentives: false,
-	volunteers: false,
+	events: true,
+	users: true,
+	roles: true,
+	submissions: true,
+	runs: true,
+	incentives: true,
+	volunteers: true,
 	files: true,
 }
 
