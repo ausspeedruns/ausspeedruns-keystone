@@ -42,4 +42,6 @@ COPY --from=builder /app/schema ./schema
 
 EXPOSE 8000
 
+RUN apk add --update --no-cache openssl1.1-compat
+
 CMD ["npm", "run", "start"]
